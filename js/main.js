@@ -1,16 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-  fetch('data/conferences.json')
-    .then(res => res.json())
-    .then(data => {
-      renderCountdowns(data.conferences);
-      renderFooter(data.lastUpdated);
-      setInterval(() => renderCountdowns(data.conferences), 1000);
-    })
-    .catch(err => {
-      console.error('Failed to load conference data:', err);
-      document.getElementById('countdowns').innerHTML =
-        '<p style="color:#e53e3e;">Failed to load conference data.</p>';
-    });
+  const data = CONFERENCE_DATA;
+  renderCountdowns(data.conferences);
+  renderFooter(data.lastUpdated);
+  setInterval(() => renderCountdowns(data.conferences), 1000);
 });
 
 function getTimeRemaining(deadline) {
