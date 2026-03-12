@@ -50,3 +50,19 @@
 - Used `toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })` to always display deadline times in KST
 - Used `-webkit-line-clamp: 2` for description truncation (works in all major browsers)
 - Cleaned up dead CSS from removed Conferences section to keep stylesheet lean
+
+## 2026-03-12 — One Card Per Conference + Passed Deadline Styling
+
+### What was done
+- **컨퍼런스당 1개 카드로 변경**: 기존 deadline별 카드 6개 → 컨퍼런스별 카드 2개
+- 각 카드 좌측에 해당 컨퍼런스의 모든 deadline을 리스트로 표시
+- 우측에는 가장 가까운 다음 deadline의 카운트다운 + "Next: {type}" 라벨 표시
+- **지난 deadline은 gray 폰트** 처리, 리스트 하단으로 정렬
+- **모든 deadline이 지난 컨퍼런스**는 카드 자체를 하단으로 정렬
+- 미사용 함수 `getStatusColor` 제거
+
+### Files modified
+| File | Changes |
+|---|---|
+| `js/main.js` | `renderCountdowns`를 컨퍼런스 단위 렌더링으로 재작성; `getConferenceInfo`, `renderConferenceCard` 함수 추가; 미사용 `getStatusColor` 제거 |
+| `css/style.css` | `.deadline-list`, `.deadline-item`, `.deadline-passed`, `.countdown-label` 스타일 추가; 미사용 `.deadline-type`, `.deadline-datetime` 제거; 카드 `align-items`를 `flex-start`로 변경 |

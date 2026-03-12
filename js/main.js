@@ -27,71 +27,85 @@ function getUrgencyClass(remaining) {
   return '';
 }
 
-function getStatusColor(remaining) {
-  if (remaining.passed) return 'gray';
-  if (remaining.days < 7) return 'red';
-  if (remaining.days < 30) return 'yellow';
-  return 'green';
+function getConferenceInfo(conf) {
+  const deadlinesWithStatus = conf.deadlines.map(dl => ({
+    type: dl.type,
+    date: dl.date,
+    remaining: getTimeRemaining(dl.date),
+    dateObj: new Date(dl.date)
+  }));
+
+  const upcoming = deadlinesWithStatus.filter(d => !d.remaining.passed)
+    .sort((a, b) => a.dateObj - b.dateObj);
+  const passed = deadlinesWithStatus.filter(d => d.remaining.passed)
+    .sort((a, b) => b.dateObj - a.dateObj);
+
+  const orderedDeadlines = [...upcoming, ...passed];
+  const primaryDeadline = upcoming.length > 0 ? upcoming[0] : passed[0];
+  const allPassed = upcoming.length === 0;
+
+  return { conf, orderedDeadlines, primaryDeadline, allPassed };
 }
 
-function renderCountdowns(conferences) {
-  const container = document.getElementById('countdowns');
-  const deadlines = [];
+function renderConferenceCard(info) {
+  const { conf, orderedDeadlines, primaryDeadline, allPassed } = info;
+  const urgency = getUrgencyClass(primaryDeadline.remaining);
 
-  conferences.forEach(conf => {
-    conf.deadlines.forEach(dl => {
-      deadlines.push({
-        confName: conf.name,
-        description: conf.description,
-        location: conf.location,
-        conferenceDates: conf.dates,
-        type: dl.type,
-        date: dl.date
-      });
-    });
-  });
-
-  deadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-  // Show only upcoming + recently passed (last 7 days)
-  const now = new Date();
-  const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-  const filtered = deadlines.filter(dl => new Date(dl.date) > weekAgo);
-
-  container.innerHTML = filtered.map(dl => {
-    const remaining = getTimeRemaining(dl.date);
-    const urgency = getUrgencyClass(remaining);
-    const deadlineDateTimeStr = new Date(dl.date).toLocaleString('ko-KR', {
+  const deadlineListHTML = orderedDeadlines.map(dl => {
+    const isPassed = dl.remaining.passed;
+    const dateStr = new Date(dl.date).toLocaleString('ko-KR', {
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul'
     }) + ' KST';
 
-    return `
-      <div class="countdown-card ${urgency}" data-deadline="${dl.date}">
-        <div class="countdown-info">
-          <div class="conf-name">${dl.confName}</div>
-          <div class="conf-description">${dl.description}</div>
-          <div class="conf-dates">Conference: ${dl.conferenceDates}</div>
-          <div class="deadline-type">${dl.type} &mdash; ${dl.location}</div>
-        </div>
-        <div class="countdown-right">
-          ${remaining.passed
-            ? '<span class="countdown-passed-text">Deadline Passed</span>'
-            : `<div class="countdown-timer">
-                <div class="time-unit"><span class="number">${remaining.days}</span><span class="label">Days</span></div>
-                <span class="time-separator">:</span>
-                <div class="time-unit"><span class="number">${String(remaining.hours).padStart(2, '0')}</span><span class="label">Hrs</span></div>
-                <span class="time-separator">:</span>
-                <div class="time-unit"><span class="number">${String(remaining.minutes).padStart(2, '0')}</span><span class="label">Min</span></div>
-                <span class="time-separator">:</span>
-                <div class="time-unit"><span class="number">${String(remaining.seconds).padStart(2, '0')}</span><span class="label">Sec</span></div>
-              </div>`
-          }
-          <div class="deadline-datetime">${deadlineDateTimeStr}</div>
+    return `<div class="deadline-item${isPassed ? ' deadline-passed' : ''}">
+      <span class="deadline-item-type">${dl.type}</span>
+      <span class="deadline-item-date">${dateStr}</span>
+    </div>`;
+  }).join('');
+
+  const remaining = primaryDeadline.remaining;
+
+  return `
+    <div class="countdown-card ${urgency}">
+      <div class="countdown-info">
+        <div class="conf-name">${conf.name}</div>
+        <div class="conf-description">${conf.description}</div>
+        <div class="conf-dates">${conf.location} &mdash; ${conf.dates}</div>
+        <div class="deadline-list">
+          ${deadlineListHTML}
         </div>
       </div>
-    `;
-  }).join('');
+      <div class="countdown-right">
+        ${allPassed
+          ? '<span class="countdown-passed-text">All Deadlines Passed</span>'
+          : `<div class="countdown-label">Next: ${primaryDeadline.type}</div>
+             <div class="countdown-timer">
+               <div class="time-unit"><span class="number">${remaining.days}</span><span class="label">Days</span></div>
+               <span class="time-separator">:</span>
+               <div class="time-unit"><span class="number">${String(remaining.hours).padStart(2, '0')}</span><span class="label">Hrs</span></div>
+               <span class="time-separator">:</span>
+               <div class="time-unit"><span class="number">${String(remaining.minutes).padStart(2, '0')}</span><span class="label">Min</span></div>
+               <span class="time-separator">:</span>
+               <div class="time-unit"><span class="number">${String(remaining.seconds).padStart(2, '0')}</span><span class="label">Sec</span></div>
+             </div>`
+        }
+      </div>
+    </div>
+  `;
+}
+
+function renderCountdowns(conferences) {
+  const container = document.getElementById('countdowns');
+  const confInfos = conferences.map(getConferenceInfo);
+
+  confInfos.sort((a, b) => {
+    if (a.allPassed && !b.allPassed) return 1;
+    if (!a.allPassed && b.allPassed) return -1;
+    return a.primaryDeadline.dateObj - b.primaryDeadline.dateObj;
+  });
+
+  container.innerHTML = confInfos.map(renderConferenceCard).join('');
 }
 
 function renderFooter(lastUpdated) {
