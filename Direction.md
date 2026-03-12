@@ -11,3 +11,15 @@
 - How to work:
   - we will use GitHub Pages to host the homepage.
   - I'll update the homepage every week with the latest information about the Defense Conference using Claude.
+
+# Direction 2
+- In `Upcoming Deadlines` section, 
+  - In the left part,
+    - Under the Conference title, add a short description of the conference.
+    - and add the date when the conference will be held.
+    - and next to the deadline, add the place where the conference will be held.
+  - In the right part,
+    - Countdown part is good.
+    - under the countdown, add date of deadline with the time when the deadline will be closed.
+- Remove "Conferences Section"
+- Except for those changes, the rest of the homepage is good.
