@@ -51,6 +51,30 @@
 - Used `-webkit-line-clamp: 2` for description truncation (works in all major browsers)
 - Cleaned up dead CSS from removed Conferences section to keep stylesheet lean
 
+## 2026-04-12 — conferences.js 실제 데이터로 교체
+
+### What was done
+- `data/resources.md`에 기록된 3개 학술대회 정보를 `data/conferences.js`에 반영
+- 기존 placeholder 데이터(KDSA 2026, ADD Symposium 2026) 제거
+- 3개 실제 학술대회로 교체:
+
+| ID | 학회명 | 주요 마감 |
+|---|---|---|
+| `ksie-spring-2026` | 한국산업경영시스템학회 춘계 | 초록: 4/15, 원고: 5/8, 사전등록: 5/15 |
+| `korms-kiie-spring-2026` | 한국경영과학회·대한산업공학회 춘계공동 | 초록: 4/15, 특별세션: 4/22, 전문: 4/30 |
+| `kimst-2026` | 한국군사과학기술학회 | 발표신청: 4/20, 접수: 5/11, 사전등록: 5/18 |
+
+- `lastUpdated` → `2026-04-12`
+- 마감 시간은 모두 `T23:59:00+09:00` (KST 자정 직전) 으로 통일
+- `location`, `dates` 미기재 항목은 `"TBD"` 처리
+
+### Files modified
+| File | Changes |
+|---|---|
+| `data/conferences.js` | 전체 `conferences` 배열 교체 (placeholder → 실제 3개 학회) |
+
+---
+
 ## 2026-03-12 — One Card Per Conference + Passed Deadline Styling
 
 ### What was done
